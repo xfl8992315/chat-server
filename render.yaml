@@ -10,5 +10,5 @@ services:
     region: oregon  # 选择部署的区域
     healthCheckPath: "/"  # 健康检查的路径
     envVars:  # 如果你有需要的环境变量可以在这里定义
-      - key: ENV
-        value: production
+      - key: PORT
+        value: 8080  # 确保使用 Render 提供的端口
