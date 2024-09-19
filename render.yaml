@@ -1,7 +1,7 @@
 services:
   - type: web
     name: my-go-app
-    env: production
+    env: go
     plan: free  # 使用免费计划
     buildCommand: "echo 'No build step needed.'"  # 因为我们已经打包好了，不需要构建
     startCommand: "./channel"  # 运行二进制文件
