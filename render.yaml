@@ -4,7 +4,7 @@ services:
     env: go
     plan: free  # 使用免费计划
     buildCommand: "echo 'No build step needed.'"  # 因为我们已经打包好了，不需要构建
-    startCommand: "chmod +x ./channel && ./channel"  # 运行二进制文件
+    startCommand: "./channel"  # 运行二进制文件
     autoDeploy: true  # 启用自动部署
     branch: main  # 部署的 Git 分支
     region: oregon  # 选择部署的区域
