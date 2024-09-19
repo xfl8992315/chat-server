@@ -1,1 +1,0 @@
-import{J as t,K as o,L as s,M as e}from"./index-8758ff05.js";const c={},n=e("div",null,"设置",-1),_=e("p",null,"本工具仅供学习交流使用!",-1),r=[n,_];function a(l,d){return o(),s("div",null,r)}const u=t(c,[["render",a]]);export{u as default};
