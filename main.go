@@ -25,8 +25,6 @@ const (
 	defaultHost    = "0.0.0.0"
 	defaultPort    = "8800"
 	defaultCountry = "US"
-	localMockFile  = "test.js"
-
 	// 商品转换默认配置。
 	defaultDiscount        = 30.0
 	defaultInventoryPolicy = "deny"
@@ -437,7 +435,7 @@ func normalizeURL(raw string) (string, error) {
 
 func fetchProductDetails(ctx context.Context, asin, country string) ([]byte, int, error) {
 	if len(apiKeys) == 0 {
-		return loadLocalMockProduct(asin)
+		return nil, http.StatusInternalServerError, errors.New("no upstream api keys configured")
 	}
 
 	start := int(atomic.AddUint64(&keyCursor, 1)-1) % len(apiKeys)
@@ -459,33 +457,7 @@ func fetchProductDetails(ctx context.Context, asin, country string) ([]byte, int
 		lastErr = errors.New("upstream request failed")
 	}
 
-	if fallbackBody, fallbackStatus, fallbackErr := loadLocalMockProduct(asin); fallbackErr == nil {
-		log.Printf("upstream fetch failed for asin %s, fallback to local mock: %v", asin, lastErr)
-		return fallbackBody, fallbackStatus, nil
-	}
-
 	return nil, lastStatus, lastErr
-}
-
-func loadLocalMockProduct(expectedASIN string) ([]byte, int, error) {
-	raw, err := os.ReadFile(localMockFile)
-	if err != nil {
-		return nil, http.StatusInternalServerError, errors.New("no upstream api keys configured, and local mock file test.js could not be read")
-	}
-
-	var product map[string]any
-	if err := json.Unmarshal(raw, &product); err != nil {
-		return nil, http.StatusInternalServerError, errors.New("local mock file test.js is not valid json")
-	}
-
-	if expectedASIN != "" {
-		mockASIN := strings.ToUpper(getString(product, "asin"))
-		if mockASIN != "" && mockASIN != strings.ToUpper(expectedASIN) {
-			log.Printf("local mock asin %s does not match requested asin %s, still using mock data", mockASIN, expectedASIN)
-		}
-	}
-
-	return raw, http.StatusOK, nil
 }
 
 func fetchWithKey(ctx context.Context, apiKey, asin, country string) ([]byte, int, error) {
@@ -581,7 +553,7 @@ func buildShoplusProductPayload(product map[string]any, cfg shoplusConfig) map[s
 		"title":                    shorten(productName, 255),
 		"seoTitle":                 shorten(productName, 255),
 		"seoDesc":                  buildSEODescription(product, longDesc),
-		"tags":                     strings.Join(buildTags(product, brand, productType), ","),
+		"tags":                     "amazon-import," + strings.Join(buildTags(product, brand, productType), ","),
 		"productShortDesc":         buildProductShortDesc(product),
 		"productLongDesc":          longDesc,
 		"taxStatus":                "",
